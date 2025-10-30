@@ -34,14 +34,14 @@ const cpick = async () => {
       window.scrollTo(0, document.body.scrollHeight);
     });
 
-    await new Promise((r) => setTimeout(r, 5000));
+    await new Promise((r) => setTimeout(r, 10000));
 
     let token = null;
     let startDate = Date.now();
     while (!token && Date.now() - startDate < 30000) {
       token = await page.evaluate(() => {
         try {
-          document.querySelector("#cf_turnstile").click();
+          document.querySelector("#cf_turnstile").click()
           let item = document.querySelector(
             '[name="cf-turnstile-response"]'
           ).value;
