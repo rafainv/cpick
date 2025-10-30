@@ -39,9 +39,9 @@ const cpick = async () => {
     let token = null;
     let startDate = Date.now();
     while (!token && Date.now() - startDate < 30000) {
+      await page.click("#cf_turnstile");
       token = await page.evaluate(() => {
         try {
-          document.querySelector("#cf_turnstile").click()
           let item = document.querySelector(
             '[name="cf-turnstile-response"]'
           ).value;
@@ -50,7 +50,7 @@ const cpick = async () => {
           return null;
         }
       });
-      await new Promise((r) => setTimeout(r, 2000));
+      await new Promise((r) => setTimeout(r, 1000));
     }
 
     await new Promise((r) => setTimeout(r, 5000));
