@@ -36,10 +36,13 @@ const cpick = async () => {
 
     await new Promise((r) => setTimeout(r, 10000));
 
+    try {
+      await page.click("#cf_turnstile");
+    } catch(e) {}
+
     let token = null;
     let startDate = Date.now();
     while (!token && Date.now() - startDate < 30000) {
-      await page.click("#cf_turnstile");
       token = await page.evaluate(() => {
         try {
           let item = document.querySelector(
