@@ -29,55 +29,57 @@ const cpick = async () => {
 
     await page.goto(url, { waitUntil: "networkidle2" });
 
-    await new Promise((r) => setTimeout(r, 5000));
-
     await page.evaluate(() => {
       document.body.style.zoom = "45%";
       window.scrollTo(0, document.body.scrollHeight);
     });
 
-    // await new Promise((r) => setTimeout(r, 200000)); //minutos?
-
-    // const cookies = await page.cookies();
-    // fs.writeFileSync(COOKIES_PATH, JSON.stringify(cookies, null, 2));
-    // console.log("Cookies salvos!");
-    //rafaeekw
-    // let token = null;
-    // let startDate = Date.now();
-    // while (!token && Date.now() - startDate < 30000) {
-    //   await page.click("#freeplay_form_cf_turnstile");
-    //   token = await page.evaluate(() => {
-    //     try {
-    //       let item = document.querySelector(
-    //         '[name="cf-turnstile-response"]'
-    //       ).value;
-    //       return item && item.length > 20 ? item : null;
-    //     } catch (e) {
-    //       return null;
-    //     }
-    //   });
-    //   await new Promise((r) => setTimeout(r, 1000));
-    // }
-
-    // await new Promise((r) => setTimeout(r, 5000));
-
-    // try {
-    //   await page.waitForFunction(() => {
-    //     const el = document.querySelector("#free_play_form_button");
-    //     if (!el) return null;
-    //     return el.style.display !== "none";
-    //   });
-    //   await new Promise((r) => setTimeout(r, 5000));
-    //   await page.waitForSelector("#free_play_form_button", { visible: true });
-    //   await page.click("#free_play_form_button", { visible: true });
-    // } catch (e) {
-    //   console.log("Botão ainda não está visível.");
-    // }
     await new Promise((r) => setTimeout(r, 5000));
+
+    let token = null;
+    let startDate = Date.now();
+    while (!token && Date.now() - startDate < 30000) {
+      token = await page.evaluate(() => {
+        try {
+          document.querySelector("#cf_turnstile").click();
+          let item = document.querySelector(
+            '[name="cf-turnstile-response"]'
+          ).value;
+          return item && item.length > 20 ? item : null;
+        } catch (e) {
+          return null;
+        }
+      });
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+
+    await new Promise((r) => setTimeout(r, 5000));
+
+    // const clockVisible = await page.evaluate(() => {
+    //   try {
+    //     const clockDiv = document.getElementById("faucet_countdown_clock");
+    //     return clockDiv && clockDiv.style.display !== "none";
+    //   } catch (e) {
+    //     return false;
+    //   }
+    // });
+
+    for (let i = 0; i < 5; i++) {
+      try {
+        // if (!clockVisible) {
+        await page.waitForSelector("#process_claim_hourly_faucet");
+        await page.click("#process_claim_hourly_faucet");
+        await new Promise((r) => setTimeout(r, 10000));
+        break;
+      } catch (e) {}
+      await new Promise((r) => setTimeout(r, 10000));
+    }
+
     await page.screenshot({ path: "screen.png" });
   } catch (error) {
     await page.screenshot({ path: "screen.png" });
     console.error(`Erro interno do servidor: ${error.message}`);
+    await browser.close();
     await new Promise((r) => setTimeout(r, 5000));
     await cpick();
   } finally {
