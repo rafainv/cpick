@@ -56,6 +56,9 @@ const cpick = async () => {
       await new Promise((r) => setTimeout(r, 1000));
     }
 
+    token ? console.log(token) : console.log("Falha ao obter o token.");
+
+
     await new Promise((r) => setTimeout(r, 8000));
 
     // const clockVisible = await page.evaluate(() => {
