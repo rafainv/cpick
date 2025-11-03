@@ -45,6 +45,7 @@ const cpick = async () => {
     while (!token && Date.now() - startDate < 30000) {
       token = await page.evaluate(() => {
         try {
+          document.querySelector("#cf_turnstile").click()
           let item = document.querySelector(
             '[name="cf-turnstile-response"]'
           ).value;
@@ -59,7 +60,7 @@ const cpick = async () => {
     token ? console.log(token) : console.log("Falha ao obter o token.");
 
 
-    await new Promise((r) => setTimeout(r, 8000));
+    await new Promise((r) => setTimeout(r, 5000));
 
     // const clockVisible = await page.evaluate(() => {
     //   try {
