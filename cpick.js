@@ -79,7 +79,7 @@ const cpick = async () => {
         await new Promise((r) => setTimeout(r, 10000));
         break;
       } catch (e) {}
-      await new Promise((r) => setTimeout(r, 10000));
+      await new Promise((r) => setTimeout(r, 20000));
     }
 
     await page.screenshot({ path: "screen.png" });
