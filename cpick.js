@@ -30,7 +30,7 @@ const cpick = async () => {
     await page.goto(url, { waitUntil: "networkidle2" });
 
     await page.evaluate(() => {
-      document.body.style.zoom = "40%";
+      document.body.style.zoom = "30%";
      // window.scrollTo(0, document.body.scrollHeight);
     });
 
@@ -76,6 +76,10 @@ const cpick = async () => {
 
     for (let i = 0; i < 5; i++) {
       try {
+        await page.evaluate(() => {
+          const clockDiv = document.getElementById("faucet_countdown_clock");
+          clockDiv.style.display !== "none";
+        });
         await page.waitForSelector("#process_claim_hourly_faucet");
         await page.click("#process_claim_hourly_faucet");
         await new Promise((r) => setTimeout(r, 10000));
