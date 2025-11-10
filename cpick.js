@@ -38,9 +38,7 @@ const cpick = async () => {
 
     try {
       await page.click("#cf_turnstile");
-    } catch(e) {
-      console.log("eeeeee")
-    }
+    } catch(e) {}
 
     let token = null;
     let startDate = Date.now();
@@ -59,23 +57,12 @@ const cpick = async () => {
       await new Promise((r) => setTimeout(r, 1000));
     }
 
-    token ? console.log(token) : console.log("Falha ao obter o token.");
-
+    // token ? console.log(token) : console.log("Falha ao obter o token.");
 
     await new Promise((r) => setTimeout(r, 5000));
 
-    // const clockVisible = await page.evaluate(() => {
-    //   try {
-    //     const clockDiv = document.getElementById("faucet_countdown_clock");
-    //     return clockDiv && clockDiv.style.display !== "none";
-    //   } catch (e) {
-    //     return false;
-    //   }
-    // });
-
     for (let i = 0; i < 5; i++) {
       try {
-        // if (!clockVisible) {
         await page.waitForSelector("#process_claim_hourly_faucet");
         await page.click("#process_claim_hourly_faucet");
         await new Promise((r) => setTimeout(r, 10000));
@@ -83,6 +70,19 @@ const cpick = async () => {
       } catch (e) {}
       await new Promise((r) => setTimeout(r, 20000));
     }
+
+    await new Promise((r) => setTimeout(r, 10000));
+
+    const clock = await page.evaluate(() => {
+      try {
+        const clockDiv = document.getElementById("faucet_countdown_clock");
+        return clockDiv && clockDiv.style.display !== "none";
+      } catch (e) {
+        return false;
+      }
+    });
+
+    clock ? console.log("clock...") : console.log("botao dispo")
 
     await page.screenshot({ path: "screen.png" });
   } catch (error) {
