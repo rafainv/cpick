@@ -38,14 +38,14 @@ const cpick = async () => {
 
     try {
       await page.click("#cf_turnstile");
-    } catch(e) {}
+    } catch (e) {}
 
     let token = null;
     let startDate = Date.now();
     while (!token && Date.now() - startDate < 30000) {
       token = await page.evaluate(() => {
         try {
-          document.querySelector("#cf_turnstile").click()
+          document.querySelector("#cf_turnstile").click();
           let item = document.querySelector(
             '[name="cf-turnstile-response"]'
           ).value;
@@ -82,7 +82,15 @@ const cpick = async () => {
       }
     });
 
-    clock ? console.log("clock...") : console.log("botao dispo")
+    if (!clock) {
+      console.log("Erro! Tentando novamente...");
+      await page.screenshot({ path: "screen.png" });
+      await browser.close();
+      await new Promise((r) => setTimeout(r, 5000));
+      await cpick();
+    }
+
+    console.log("Sucesso!");
 
     await page.screenshot({ path: "screen.png" });
   } catch (error) {
