@@ -84,7 +84,7 @@ const cpick = async () => {
             return false;
           }
         });
-        if(clock) {
+        if(!clock) {
           await page.waitForSelector("#process_claim_hourly_faucet");
           await page.click("#process_claim_hourly_faucet");
           await new Promise((r) => setTimeout(r, 10000));
