@@ -76,14 +76,20 @@ const cpick = async () => {
 
     for (let i = 0; i < 5; i++) {
       try {
-        await page.evaluate(() => {
-          const clockDiv = document.getElementById("faucet_countdown_clock");
-          clockDiv.style.display !== "none";
+        const clock = await page.evaluate(() => {
+          try {
+            const clockDiv = document.getElementById("faucet_countdown_clock");
+            return clockDiv && clockDiv.style.display !== "none";
+          } catch (e) {
+            return false;
+          }
         });
-        await page.waitForSelector("#process_claim_hourly_faucet");
-        await page.click("#process_claim_hourly_faucet");
-        await new Promise((r) => setTimeout(r, 10000));
-        break;
+        if(clock) {
+          await page.waitForSelector("#process_claim_hourly_faucet");
+          await page.click("#process_claim_hourly_faucet");
+          await new Promise((r) => setTimeout(r, 10000));
+          break;
+        }
       } catch (e) {
         console.log("Erro! Tentando novamente...");
         await page.screenshot({ path: "screen.png" });
