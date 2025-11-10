@@ -82,9 +82,10 @@ const cpick = async () => {
       }
     });
 
-    if (!clock) {
+    await page.screenshot({ path: "screen.png" });
+
+    if (clock) {
       console.log("Erro! Tentando novamente...");
-      await page.screenshot({ path: "screen.png" });
       await browser.close();
       await new Promise((r) => setTimeout(r, 5000));
       await cpick();
