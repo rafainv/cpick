@@ -36,6 +36,17 @@ const cpick = async () => {
 
     await new Promise((r) => setTimeout(r, 10000));
 
+    for (let i = 0; i < 5; i++) {
+      try {
+        // if (!clockVisible) {
+        await page.waitForSelector("#process_claim_hourly_faucet");
+        await page.click("#process_claim_hourly_faucet");
+        await new Promise((r) => setTimeout(r, 10000));
+        break;
+      } catch (e) {}
+      await new Promise((r) => setTimeout(r, 20000));
+    }
+
     try {
       await page.click("#cf_turnstile");
     } catch(e) {}
@@ -57,7 +68,7 @@ const cpick = async () => {
       await new Promise((r) => setTimeout(r, 1000));
     }
 
-    token ? console.log(token) : console.log("Falha ao obter o token.");
+    //token ? console.log(token) : console.log("Falha ao obter o token.");
 
 
     await new Promise((r) => setTimeout(r, 5000));
@@ -70,17 +81,6 @@ const cpick = async () => {
     //     return false;
     //   }
     // });
-
-    for (let i = 0; i < 5; i++) {
-      try {
-        // if (!clockVisible) {
-        await page.waitForSelector("#process_claim_hourly_faucet");
-        await page.click("#process_claim_hourly_faucet");
-        await new Promise((r) => setTimeout(r, 10000));
-        break;
-      } catch (e) {}
-      await new Promise((r) => setTimeout(r, 20000));
-    }
 
     await page.screenshot({ path: "screen.png" });
   } catch (error) {
