@@ -36,9 +36,22 @@ const cpick = async () => {
 
     await new Promise((r) => setTimeout(r, 10000));
 
+    // const clock = await page.evaluate(() => {
+    //   try {
+    //     const clockDiv = document.getElementById("faucet_countdown_clock");
+    //     return clockDiv && clockDiv.style.display !== "none";
+    //   } catch (e) {
+    //     return false;
+    //   }
+    // });
+
+    await page.screenshot({ path: "screen.png" });
+
     try {
       await page.click("#cf_turnstile");
-    } catch (e) {}
+    } catch (e) {
+      console.log("erro ao CF")
+    }
 
     let token = null;
     let startDate = Date.now();
@@ -67,29 +80,17 @@ const cpick = async () => {
         await page.click("#process_claim_hourly_faucet");
         await new Promise((r) => setTimeout(r, 10000));
         break;
-      } catch (e) {}
+      } catch (e) {
+        console.log("Erro! Tentando novamente...");
+        await page.screenshot({ path: "screen.png" });
+        await browser.close();
+        await new Promise((r) => setTimeout(r, 5000));
+        await cpick();
+      }
       await new Promise((r) => setTimeout(r, 20000));
     }
 
     await new Promise((r) => setTimeout(r, 10000));
-
-    const clock = await page.evaluate(() => {
-      try {
-        const clockDiv = document.getElementById("faucet_countdown_clock");
-        return clockDiv && clockDiv.style.display !== "none";
-      } catch (e) {
-        return false;
-      }
-    });
-
-    await page.screenshot({ path: "screen.png" });
-
-    if (clock) {
-      console.log("Erro! Tentando novamente...");
-      await browser.close();
-      await new Promise((r) => setTimeout(r, 5000));
-      await cpick();
-    }
 
     console.log("Sucesso!");
 
