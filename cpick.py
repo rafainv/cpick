@@ -19,7 +19,7 @@ for cookie in cookies.split("; "):
     )
 
 sb.refresh()
-
+sb.sleep(5)
 sb.solve_captcha()
 # token = None
 # start_time = time.time()
