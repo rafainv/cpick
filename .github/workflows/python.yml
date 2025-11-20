@@ -51,7 +51,7 @@ jobs:
         env:
           URL: ${{ secrets.URL }}
           COOKIES: ${{ secrets.COOKIES }} 
-        run: xvfb-run --auto-servernum -- cpick.py
+        run: xvfb-run --auto-servernum -- python cpick.py
 
       - name: Fazer upload da captura de tela
         if: success() || failure()
