@@ -29,6 +29,9 @@ jobs:
           pip install seleniumbase python-dotenv
 
       - name: Executar script Python
+        env:
+          URL: ${{ secrets.URL }}
+          COOKIES: ${{ secrets.COOKIES }} 
         run: python cpick.py
 
       - name: Fazer upload da captura de tela
