@@ -21,31 +21,31 @@ for cookie in cookies.split("; "):
 sb.refresh()
 
 sb.solve_captcha()
-token = None
-start_time = time.time()
-while not token and (time.time() - start_time) < 30:
-    token = sb.execute_script("""
-        (() => {
-            try {
-                let item = document.querySelector('[name="cf-turnstile-response"]').value;
-                return item && item.length > 20 ? item : null;
-            } catch (e) {
-                return null;
-            }
-        })()
-    """)
-    sb.sleep(1)
+# token = None
+# start_time = time.time()
+# while not token and (time.time() - start_time) < 30:
+#     token = sb.execute_script("""
+#         (() => {
+#             try {
+#                 let item = document.querySelector('[name="cf-turnstile-response"]').value;
+#                 return item && item.length > 20 ? item : null;
+#             } catch (e) {
+#                 return null;
+#             }
+#         })()
+#     """)
+#     sb.sleep(1)
 
 sb.sleep(5)
 
-for i in range(5):
-    try:
-        sb.click("#process_claim_hourly_faucet", timeout=10)
-        sb.sleep(10)
-        break
-    except Exception as e:
-        pass
-    sb.sleep(10)
+# for i in range(5):
+#     try:
+sb.click("#process_claim_hourly_faucet", timeout=10)
+sb.sleep(10)
+    #     break
+    # except Exception as e:
+    #     pass
+    # sb.sleep(10)
 
 sb.save_screenshot("screen.png")
 
