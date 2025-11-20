@@ -1,0 +1,39 @@
+name: Python
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências do Python
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install seleniumbase python-dotenv
+
+      - name: Executar script Python
+        run: python cpick.py
+
+      - name: Fazer upload da captura de tela
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot
+          path: screen.png
