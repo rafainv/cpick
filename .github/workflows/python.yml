@@ -11,13 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Instalar dependências
-        run: |
-          pip install seleniumbase
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Rodar script
+      - name: Install deps
+        run: |
+          pip install seleniumbase python-dotenv
+
+      - name: Run bot
         run: |
           xvfb-run python3 cpick.py
-        env:
-          URL: ${{ secrets.URL }}
-          COOKIES: ${{ secrets.COOKIES }}
