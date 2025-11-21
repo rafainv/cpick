@@ -26,3 +26,11 @@ jobs:
           COOKIES: ${{ secrets.COOKIES }}
         run: |
           xvfb-run python3 cpick.py
+
+      
+      - name: Fazer upload da captura de tela
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot
+          path: screen.png
