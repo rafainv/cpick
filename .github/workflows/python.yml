@@ -21,5 +21,8 @@ jobs:
           pip install seleniumbase python-dotenv
 
       - name: Run bot
+        env:
+          URL: ${{ secrets.URL }}
+          COOKIES: ${{ secrets.COOKIES }}
         run: |
           xvfb-run python3 cpick.py
