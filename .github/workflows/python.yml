@@ -8,20 +8,16 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install deps
+      - name: Instalar dependências
         run: |
-          pip install seleniumbase python-dotenv
+          pip install seleniumbase
 
-      - name: Run bot
+      - name: Rodar script
         run: |
           xvfb-run python3 cpick.py
+        env:
+          URL: ${{ secrets.URL }}
+          COOKIES: ${{ secrets.COOKIES }}
