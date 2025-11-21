@@ -1,36 +1,36 @@
-name: cpick
+# name: cpick
 
-on:
-  schedule:
-    - cron: "0 * * * *"
-  workflow_dispatch:
+# on:
+#   schedule:
+#     - cron: "0 * * * *"
+#   workflow_dispatch:
 
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+# jobs:
+#   run:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+#       - name: Install Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: "3.11"
 
-      - name: Install deps
-        run: |
-          pip install seleniumbase python-dotenv
+#       - name: Install deps
+#         run: |
+#           pip install seleniumbase python-dotenv
 
-      - name: Run bot
-        env:
-          URL: ${{ secrets.URL }}
-          COOKIES: ${{ secrets.COOKIES }}
-        run: |
-          xvfb-run python3 cpick.py
+#       - name: Run bot
+#         env:
+#           URL: ${{ secrets.URL }}
+#           COOKIES: ${{ secrets.COOKIES }}
+#         run: |
+#           xvfb-run python3 cpick.py
 
       
-      - name: Fazer upload da captura de tela
-        if: success() || failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshot
-          path: screen.png
+#       - name: Fazer upload da captura de tela
+#         if: success() || failure()
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: screenshot
+#           path: screen.png
