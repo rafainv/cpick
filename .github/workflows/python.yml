@@ -31,7 +31,7 @@ jobs:
           URL: ${{ secrets.URL }}
           COOKIES: ${{ secrets.COOKIES }}
         run: |
-          xvfb-run python3 main.py
+          xvfb-run python3 cpick.py
 
       - name: Upload screenshot
         if: always()
