@@ -1,91 +1,103 @@
 import os
 import time
-from dotenv import load_dotenv
 from seleniumbase import SB
 from selenium.webdriver.common.action_chains import ActionChains
+from dotenv import load_dotenv
 
 load_dotenv()
 
 URL = os.getenv("URL")
-COOK = os.getenv("COOKIES")
+COOK = os.getenv("COOKIES")   # cookies no formato "a=1; b=2; c=3"
 
+if not URL:
+    raise Exception("ERRO: Variável URL não definida no .env")
 
-def wait_turnstile(sb, timeout=35):
-    """
-    Detecta e espera o Turnstile liberar automaticamente.
-    (sem clicar, sem tkinter)
-    """
+if not COOK:
+    raise Exception("ERRO: Variável COOKIES não definida no .env")
+
+# ---------------------------------------------------------
+# Função: esperar Turnstile Cloudflare desaparecer
+# ---------------------------------------------------------
+def wait_turnstile(sb, timeout=40):
     print("Aguardando Turnstile...")
 
-    start = time.time()
-
-    while time.time() - start < timeout:
-        sb.sleep(1)
-
-        # verifica se já liberou capturando o token oculto
+    for i in range(timeout):
         try:
-            token = sb.get_attribute('input[name="cf-turnstile-response"]', "value")
-            if token and len(token) > 10:
-                print("Turnstile liberou!")
+            exist = sb.is_element_visible('iframe[src*="turnstile"]')
+            if not exist:
+                print("✔ Turnstile liberado!")
                 return True
         except:
             pass
+        time.sleep(1)
 
     print("⚠ Turnstile não resolveu a tempo.")
     return False
 
-
-def click_humano(sb, selector):
-    """
-    Clique compatível com Cloudflare. Não usa tkinter.
-    """
-    print("Clicando com ActionChains (humano real)...")
+# ---------------------------------------------------------
+# Função: clicar humanamente no botão Claim
+# ---------------------------------------------------------
+def click_claim(sb):
+    selector = "#process_claim_hourly_faucet"
 
     btn = sb.find_element(selector)
     sb.scroll_to(btn)
     sb.sleep(1)
 
+    # ActionChains (simula usuário real)
     actions = ActionChains(sb.driver)
-    actions.move_to_element(btn).pause(0.4).click().perform()
+    actions.move_to_element(btn).pause(0.3).click().perform()
 
-    sb.sleep(2)
-    print("Clique enviado (ActionChains).")
+    print("✔ Click humano executado!")
 
 
-# ===================================================================
-#                            SCRIPT PRINCIPAL
-# ===================================================================
-
-with SB(uc=True, test=True, headed=False) as sb:
-
-    if not URL:
-        raise SystemExit("ERRO: variável URL não está definida no .env")
-
-    if not COOK:
-        raise SystemExit("ERRO: variável COOKIES não está definida no .env")
-
+# ---------------------------------------------------------
+# SCRIPT PRINCIPAL
+# ---------------------------------------------------------
+with SB(uc=True, locale_code="pt-BR", headed=False, test=True) as sb:
+    print("Abrindo página...")
     sb.open(URL)
 
-    # adicionar cookies
-    print("Adicionando cookies...")
-    expires = int(time.time()) + 86400 * 30
+    # ---- Aplicar cookies ----
+    expires = int(time.time()) + 3600 * 24 * 30
 
     for c in COOK.split("; "):
-        if "=" in c:
-            name, val = c.split("=", 1)
-            sb.add_cookie({"name": name, "value": val, "expiry": expires, "path": "/"})
+        if "=" not in c:
+            continue
+        name, value = c.split("=", 1)
+        sb.add_cookie({
+            "name": name,
+            "value": value,
+            "path": "/",
+            "expiry": expires,
+            "sameSite": "Lax",
+        })
 
     sb.refresh()
-    sb.sleep(4)
+    sb.sleep(3)
 
-    # aguardar turnstile
+    # ---- Aguardar Cloudflare / Turnstile ----
     wait_turnstile(sb, timeout=40)
+    sb.sleep(2)
 
-    # clicar
-    click_humano(sb, "#process_claim_hourly_faucet")
+    # ---- Tentar Solve Automático (SeleniumBase AI) ----
+    try:
+        sb.solve_captcha()
+        print("Captcha resolvido pelo SeleniumBase.")
+    except Exception:
+        print("solve_captcha não resolveu, continuando manual.")
 
-    sb.sleep(5)
+    sb.sleep(3)
 
-    sb.save_screenshot("screen.png")
+    # ---- Clicar no botão CLAIM ----
+    try:
+        click_claim(sb)
+    except Exception as e:
+        print("Erro ao clicar no claim:", e)
 
-    print("=== FIM ===")
+    sb.sleep(6)
+
+    sb.save_screenshot("resultado.png")
+    print("🖼 Screenshot salvo: resultado.png")
+
+print("=== FIM ===")
