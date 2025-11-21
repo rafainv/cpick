@@ -1,109 +1,89 @@
 import os
 import time
 from seleniumbase import SB
+from selenium.webdriver.common.action_chains import ActionChains
 from dotenv import load_dotenv
 
 load_dotenv()
 
-URL = os.getenv("URL")
-COOK = os.getenv("COOKIES")  # VALOR FIXO VIA SECRETS
+URL  = os.getenv("URL")
+COOK = os.getenv("COOKIES")
 
 if not COOK:
-    print("ERRO: variável COOKIES não definida no GitHub Actions!")
-    exit(1)
+    raise Exception("❌ Variável COOKIES não encontrada no .env")
 
-def wait_turnstile(sb):
-    """
-    Espera o Turnstile sumir (managed challenge).
-    Não tenta clicar (isso NÃO funciona em headless no Turnstile).
-    Apenas espera liberação automática.
-    """
-    print("Aguardando Cloudflare / Turnstile...")
-
-    # tenta detectar spinner / challenge overlay
-    possible = [
-        "iframe[src*='challenge-platform']",
-        "div[id*='cf']", 
-        "#cf-turnstile",
-        "[name='cf-turnstile-response']",
-        "iframe[title*='Cloudflare']",
-    ]
-
-    # espera até sumir o overlay (30s)
-    timeout = 30
-    start = time.time()
-
-    while time.time() - start < timeout:
-        still = False
-        for sel in possible:
-            try:
-                if sb.is_element_visible(sel):
-                    still = True
-                    break
-            except:
-                pass
-
-        if not still:
-            print("Cloudflare liberado.")
-            return True
-
-        time.sleep(1)
-
-    print("⚠ Turnstile não resolveu a tempo.")
-    return False
-
+def add_cookies(sb, cookie_str):
+    expires = int(time.time()) + (30 * 24 * 60 * 60)
+    for c in cookie_str.split("; "):
+        if "=" in c:
+            name, value = c.split("=", 1)
+            sb.add_cookie({
+                "name": name,
+                "value": value,
+                "path": "/",
+                "sameSite": "Lax",
+                "expiry": expires,
+            })
 
 def click_humano(sb, selector):
-    """
-    Clique humano real sem mouseinfo.
-    Usa ActionChains puro → funcionamento 100% headless.
-    """
-    from selenium.webdriver.common.action_chains import ActionChains
-
     try:
-        btn = sb.find_element(selector)
-        sb.scroll_to(btn)
-        time.sleep(1)
+        el = sb.find_element(selector)
+        sb.scroll_to(el)
+        sb.sleep(1)
 
         actions = ActionChains(sb.driver)
-        actions.move_to_element(btn).pause(0.25).click().perform()
-        print("CLICK HUMANO OK!")
+        actions.move_to_element(el).pause(0.25).click().perform()
+
+        print("✔ CLICK HUMANO OK")
         return True
     except Exception as e:
-        print("ERRO CLICK HUMANO:", e)
+        print("✖ Falhou no click humano:", e)
+        return False
+
+def click_js(sb, selector):
+    try:
+        sb.execute_script("document.querySelector(arguments[0]).click();", selector)
+        print("✔ CLICK JS OK")
+        return True
+    except:
         return False
 
 
-
-# ========================= SCRIPT PRINCIPAL =========================
-
 with SB(uc=True, test=True, headed=False) as sb:
-    sb.open(URL)
 
-    # aplica cookies
-    expires = int(time.time()) + 2592000
-    for c in COOK.split("; "):
-        name, value = c.split("=", 1)
-        sb.add_cookie({
-            "name": name,
-            "value": value,
-            "path": "/",
-            "expiry": expires,
-            "sameSite": "Lax",
-        })
+    print("🔵 Abrindo página...")
+    sb.open(URL)
+    sb.sleep(3)
+
+    print("🔵 Inserindo cookies...")
+    add_cookies(sb, COOK)
 
     sb.refresh()
-    time.sleep(4)
+    sb.sleep(4)
 
-    # aguarda liberar Cloudflare (turnstile)
-    wait_turnstile(sb)
+    print("🔵 Aguardando Cloudflare liberar...")
+    sb.sleep(11)     # Cloudflare Managed Challenge geralmente 5–10s
 
-    time.sleep(3)
+    selector = "#process_claim_hourly_faucet"
 
-    # clica no botão
-    click_humano(sb, "#process_claim_hourly_faucet")
+    print("🔵 Tentando clique humano...")
+    if not click_humano(sb, selector):
 
-    time.sleep(8)
+        print("🔵 Tentando clique via JavaScript...")
+        if not click_js(sb, selector):
+
+            print("⚠ Nenhum método conseguiu clicar, tentando varredura global...")
+            sb.execute_script("""
+                [...document.querySelectorAll('*')].forEach(e=>{
+                    if(e.id=='process_claim_hourly_faucet' || e.textContent.includes('Claim')){
+                        try{ e.click(); }catch{}
+                    }
+                })
+            """)
+
+    sb.sleep(8)
+
+    print("📸 Salvando screenshot...")
     sb.save_screenshot("screen.png")
 
-print("=== FIM ===")
+print("✅ FINALIZADO")
